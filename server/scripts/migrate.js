@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import url from 'node:url';
+import url, { pathToFileURL } from 'node:url';
 import { pool } from '../src/db.js';
 
 const here = path.dirname(url.fileURLToPath(import.meta.url));
@@ -23,15 +23,27 @@ async function applied() {
 async function main() {
   await ensureTable();
   const done = await applied();
-  const files = (await fs.readdir(migrationsDir)).filter((f) => f.endsWith('.sql')).sort();
+  const files = (await fs.readdir(migrationsDir))
+    .filter((f) => f.endsWith('.sql') || f.endsWith('.js'))
+    .sort();
+
   for (const file of files) {
     if (done.has(file)) continue;
-    const sql = await fs.readFile(path.join(migrationsDir, file), 'utf8');
     console.log(`applying ${file}...`);
     const client = await pool.connect();
     try {
       await client.query('begin');
-      await client.query(sql);
+      const full = path.join(migrationsDir, file);
+      if (file.endsWith('.sql')) {
+        const sql = await fs.readFile(full, 'utf8');
+        await client.query(sql);
+      } else {
+        const mod = await import(pathToFileURL(full).href);
+        if (typeof mod.up !== 'function') {
+          throw new Error(`${file}: expected export "up(client)"`);
+        }
+        await mod.up(client);
+      }
       await client.query('insert into _migrations (name) values ($1)', [file]);
       await client.query('commit');
     } catch (err) {
@@ -41,6 +53,7 @@ async function main() {
       client.release();
     }
   }
+
   await pool.end();
   console.log('migrations done');
 }

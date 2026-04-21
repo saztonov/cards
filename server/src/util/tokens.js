@@ -4,7 +4,7 @@ import { config } from '../config.js';
 
 export function signToken(user) {
   return jwt.sign(
-    { sub: user.id, slug: user.slug },
+    { sub: user.id, slug: user.slug, role: user.role || 'user' },
     config.jwt.secret,
     { algorithm: 'HS256', expiresIn: config.jwt.ttlSec }
   );

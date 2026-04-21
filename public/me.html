@@ -16,6 +16,7 @@
       <div class="header">
         <div class="header__title">Моя визитка</div>
         <div style="display:flex; gap:.5rem;">
+          <a id="adminLink" class="btn btn--soft" href="/admin.html" hidden>Администрирование</a>
           <a id="publicLink" class="btn btn--soft" target="_blank">Открыть</a>
           <button id="logout" class="btn btn--ghost" type="button">Выйти</button>
         </div>
@@ -84,6 +85,7 @@
       throw ex;
     }
     setAttr($('#publicLink'), 'href', `/c.html?slug=${encodeURIComponent(me.slug)}`);
+    if (me.role === 'admin') $('#adminLink').hidden = false;
     for (const f of ['full_name', 'position', 'phone', 'telegram', 'about']) {
       $(`#${f}`).value = me[f] || '';
     }

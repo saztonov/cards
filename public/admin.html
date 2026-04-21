@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ru" data-default-theme="modern">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Администрирование · СУ-10</title>
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/themes/modern.css">
+  <link rel="stylesheet" href="/css/themes/legacy.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/config.js" onerror="this.remove()"></script>
+</head>
+<body>
+  <main class="page">
+    <section class="card card--wide">
+      <div class="header">
+        <div class="header__title">Администрирование</div>
+        <div style="display:flex; gap:.5rem;">
+          <a class="btn btn--soft" href="/me.html">Моя визитка</a>
+          <button id="logout" class="btn btn--ghost" type="button">Выйти</button>
+        </div>
+      </div>
+
+      <div class="body body--lg">
+        <h2 style="font-size:var(--text-lg); margin-bottom:var(--space-2);">Ожидают подтверждения</h2>
+        <div id="pending" class="stack"></div>
+
+        <h2 style="font-size:var(--text-lg); margin-top:var(--space-8); margin-bottom:var(--space-2);">Активные пользователи</h2>
+        <div id="active" class="stack"></div>
+      </div>
+    </section>
+
+    <div class="theme-switch">
+      Тема: <button type="button" data-theme-action="modern">современная</button>
+      · <button type="button" data-theme-action="legacy">классическая</button>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initTheme, setTheme } from '/js/theme.js';
+    import { apiJson, api, hasToken, clearToken } from '/js/api.js';
+    import { setText, $, $$, clear } from '/js/lib/escape.js';
+
+    initTheme();
+    for (const btn of $$('[data-theme-action]')) {
+      btn.addEventListener('click', () => setTheme(btn.dataset.themeAction));
+    }
+
+    if (!hasToken()) { location.replace('/login.html'); throw new Error('unauth'); }
+
+    $('#logout').addEventListener('click', () => {
+      clearToken();
+      location.replace('/');
+    });
+
+    async function loadUsers() {
+      let users;
+      try {
+        users = await apiJson('/api/v1/admin/users');
+      } catch (ex) {
+        if (ex.status === 403) { location.replace('/me.html'); throw ex; }
+        if (ex.status === 401) { clearToken(); location.replace('/login.html'); throw ex; }
+        throw ex;
+      }
+      render(users);
+    }
+
+    function render(users) {
+      const pending = users.filter((u) => !u.is_active);
+      const active = users.filter((u) => u.is_active);
+      renderList($('#pending'), pending, 'Нет новых заявок.');
+      renderList($('#active'),  active,  'Активных пользователей пока нет.');
+    }
+
+    function renderList(box, list, emptyText) {
+      clear(box);
+      if (!list.length) {
+        const p = document.createElement('p');
+        p.className = 'muted';
+        setText(p, emptyText);
+        box.appendChild(p);
+        return;
+      }
+      for (const u of list) {
+        box.appendChild(renderRow(u));
+      }
+    }
+
+    function renderRow(u) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      const info = document.createElement('div');
+      info.style.flex = '1';
+      const top = document.createElement('div');
+      top.className = 'row__name';
+      setText(top, u.full_name || u.email);
+      const sub = document.createElement('div');
+      sub.className = 'row__role';
+      const when = new Date(u.created_at).toLocaleString('ru-RU');
+      const roleMark = u.role === 'admin' ? ' · admin' : '';
+      setText(sub, `${u.email} · ${when}${roleMark}`);
+      info.append(top, sub);
+
+      const actions = document.createElement('div');
+      actions.style.display = 'flex';
+      actions.style.gap = '.5rem';
+
+      if (!u.is_active) {
+        actions.appendChild(button('Активировать', 'btn btn--primary', async () => {
+          await api(`/api/v1/admin/users/${u.id}/activate`, { method: 'POST' });
+          await loadUsers();
+        }));
+      } else {
+        actions.appendChild(button('Деактивировать', 'btn btn--ghost', async () => {
+          await api(`/api/v1/admin/users/${u.id}/deactivate`, { method: 'POST' });
+          await loadUsers();
+        }));
+      }
+      actions.appendChild(button('Удалить', 'btn btn--ghost', async () => {
+        if (!confirm(`Удалить ${u.email}?`)) return;
+        await api(`/api/v1/admin/users/${u.id}`, { method: 'DELETE' });
+        await loadUsers();
+      }));
+
+      row.append(info, actions);
+      return row;
+    }
+
+    function button(label, className, onClick) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = className;
+      setText(b, label);
+      b.addEventListener('click', onClick);
+      return b;
+    }
+
+    loadUsers();
+  </script>
+</body>
+</html>

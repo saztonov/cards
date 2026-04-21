@@ -8,9 +8,20 @@ export function requireAuth(req, res, next) {
   }
   try {
     const payload = verifyToken(token);
-    req.user = { id: payload.sub, slug: payload.slug };
+    req.user = {
+      id: payload.sub,
+      slug: payload.slug,
+      role: payload.role || 'user',
+    };
     next();
   } catch {
     res.status(401).json({ error: 'invalid_token' });
   }
+}
+
+export function requireAdmin(req, res, next) {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  next();
 }

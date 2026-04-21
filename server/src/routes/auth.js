@@ -2,7 +2,12 @@ import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import { query } from '../db.js';
 import { signToken, slugify } from '../util/tokens.js';
-import { loginIpLimiter, loginEmailLimiter, authSoftLimiter } from '../middleware/rate-limit.js';
+import {
+  loginIpLimiter,
+  loginEmailLimiter,
+  registerIpLimiter,
+  registerGlobalLimiter,
+} from '../middleware/rate-limit.js';
 
 const router = Router();
 
@@ -21,7 +26,7 @@ async function uniqueSlug(seed) {
 }
 
 // POST /api/v1/auth/register
-router.post('/register', authSoftLimiter, async (req, res) => {
+router.post('/register', registerGlobalLimiter, registerIpLimiter, async (req, res) => {
   const email = String(req.body?.email || '').trim().toLowerCase();
   const password = String(req.body?.password || '');
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'invalid_email' });
@@ -33,13 +38,13 @@ router.post('/register', authSoftLimiter, async (req, res) => {
   const password_hash = await bcrypt.hash(password, BCRYPT_COST);
   const slug = await uniqueSlug(email.split('@')[0]);
 
-  const { rows } = await query(
-    'insert into users (email, password_hash, slug) values ($1, $2, $3) returning id, slug',
+  await query(
+    `insert into users (email, password_hash, slug, role, is_active)
+     values ($1, $2, $3, 'user', false)`,
     [email, password_hash, slug]
   );
-  const user = rows[0];
 
-  res.status(201).json({ token: signToken(user) });
+  res.status(202).json({ pending: true });
 });
 
 // POST /api/v1/auth/login
@@ -49,13 +54,14 @@ router.post('/login', loginIpLimiter, loginEmailLimiter, async (req, res) => {
   if (!email || !password) return res.status(400).json({ error: 'invalid_credentials' });
 
   const { rows } = await query(
-    'select id, password_hash, slug from users where email = $1',
+    'select id, password_hash, slug, role, is_active from users where email = $1',
     [email]
   );
   const user = rows[0];
   const hash = user?.password_hash || '$2b$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinva';
   const ok = await bcrypt.compare(password, hash);
   if (!user || !ok) return res.status(401).json({ error: 'invalid_credentials' });
+  if (!user.is_active) return res.status(403).json({ error: 'not_activated' });
 
   res.json({ token: signToken(user) });
 });

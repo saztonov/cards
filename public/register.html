@@ -14,6 +14,7 @@
   <main class="page" style="justify-content:center;">
     <form id="form" class="card card--narrow body--lg stack">
       <h1 class="header__title" style="color:var(--c-text);">Регистрация</h1>
+      <p class="muted">После регистрации администратор подтвердит ваш аккаунт. Войти можно будет только после подтверждения.</p>
 
       <div>
         <label class="label" for="email">Email</label>
@@ -24,9 +25,13 @@
         <input id="password" class="field" type="password" required minlength="6" autocomplete="new-password">
       </div>
 
+      <p id="done" class="muted" hidden>
+        Аккаунт создан, ожидает подтверждения администратором.
+        Вы получите возможность войти после активации.
+      </p>
       <p id="error" class="muted" hidden style="color:#c0392b;"></p>
 
-      <button type="submit" class="btn btn--primary btn--block">Создать аккаунт</button>
+      <button id="submit" type="submit" class="btn btn--primary btn--block">Создать аккаунт</button>
 
       <p class="muted center" style="font-size:var(--text-sm);">
         <a href="/login.html">Уже есть аккаунт — войти</a>
@@ -36,7 +41,7 @@
 
   <script type="module">
     import { initTheme } from '/js/theme.js';
-    import { apiJson, setToken, hasToken } from '/js/api.js';
+    import { apiJson, hasToken } from '/js/api.js';
     import { setText, $ } from '/js/lib/escape.js';
 
     initTheme();
@@ -47,12 +52,14 @@
       e.preventDefault();
       $('#error').hidden = true;
       try {
-        const data = await apiJson('/api/v1/auth/register', {
+        await apiJson('/api/v1/auth/register', {
           method: 'POST',
           body: { email: $('#email').value, password: $('#password').value },
         });
-        setToken(data.token);
-        location.replace('/me.html');
+        $('#done').hidden = false;
+        $('#submit').disabled = true;
+        $('#email').disabled = true;
+        $('#password').disabled = true;
       } catch (ex) {
         const err = $('#error');
         err.hidden = false;
@@ -60,7 +67,8 @@
           password_too_short: 'Пароль должен быть минимум 6 символов.',
           email_taken: 'Этот email уже зарегистрирован.',
           invalid_email: 'Некорректный email.',
-          rate_limited: 'Слишком много запросов, попробуйте позже.',
+          too_many_registrations_ip: 'Слишком много регистраций с вашего IP. Попробуйте через минуту.',
+          too_many_registrations_global: 'Сайт принимает слишком много регистраций. Попробуйте позже.',
         }[ex.message] || 'Не удалось зарегистрироваться.';
         setText(err, msg);
       }

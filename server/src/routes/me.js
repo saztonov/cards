@@ -37,7 +37,7 @@ function sanitize(input) {
 // GET /api/v1/me
 router.get('/', async (req, res) => {
   const { rows } = await query(
-    `select id, email, slug, full_name, position, phone, telegram, about, avatar_path, social
+    `select id, email, slug, full_name, position, phone, telegram, about, avatar_path, social, role, is_active
        from users where id = $1`,
     [req.user.id]
   );

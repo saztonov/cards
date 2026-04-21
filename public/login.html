@@ -57,6 +57,7 @@
         err.hidden = false;
         const msg = {
           invalid_credentials: 'Неверный email или пароль.',
+          not_activated: 'Аккаунт ещё не активирован администратором.',
           too_many_attempts: 'Слишком много попыток. Повторите позже.',
         }[ex.message] || 'Не удалось войти.';
         setText(err, msg);

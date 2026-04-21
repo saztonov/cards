@@ -21,11 +21,21 @@ export const loginEmailLimiter = rateLimit({
   message: { error: 'too_many_attempts' },
 });
 
-// Мягкий лимит на регистрацию/reset, чтобы не спамили email-ом
-export const authSoftLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  limit: 20,
+// 3 регистрации / минуту / IP
+export const registerIpLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 3,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'rate_limited' },
+  message: { error: 'too_many_registrations_ip' },
+});
+
+// 30 регистраций / час — глобальный лимит на весь сайт
+export const registerGlobalLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: () => 'global',
+  message: { error: 'too_many_registrations_global' },
 });

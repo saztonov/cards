@@ -5,6 +5,7 @@ import { securityHeaders } from './middleware/security-headers.js';
 import authRoutes from './routes/auth.js';
 import meRoutes from './routes/me.js';
 import cardsRoutes from './routes/cards.js';
+import adminRoutes from './routes/admin.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -32,6 +33,7 @@ app.get('/api/v1/health', (_req, res) => res.json({ ok: true, theme: config.defa
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/me', meRoutes);
 app.use('/api/v1/cards', cardsRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // Раздача загруженных файлов — в проде эту задачу берёт nginx (location /uploads/).
 app.use('/uploads', express.static(path.resolve(config.uploads.dir)));
