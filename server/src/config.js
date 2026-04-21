@@ -19,8 +19,7 @@ export const config = {
 
   jwt: {
     secret: required('JWT_SECRET'),
-    accessTtlSec: Number(process.env.ACCESS_TTL_SECONDS || 900),
-    refreshTtlDays: Number(process.env.REFRESH_TTL_DAYS || 30),
+    ttlSec: Number(process.env.JWT_TTL_SECONDS || 7 * 24 * 3600),
   },
 
   uploads: {
@@ -28,16 +27,7 @@ export const config = {
     maxBytes: (Number(process.env.MAX_UPLOAD_MB || 5)) * 1024 * 1024,
   },
 
-  smtp: {
-    host: process.env.SMTP_HOST || '',
-    port: Number(process.env.SMTP_PORT || 587),
-    user: process.env.SMTP_USER || '',
-    password: process.env.SMTP_PASSWORD || '',
-    from: process.env.SMTP_FROM || 'Cards <no-reply@cards.fvds.ru>',
-  },
-
   corsOrigin: process.env.CORS_ORIGIN || '',
-  cookieSecure: (process.env.COOKIE_SECURE || 'false') === 'true',
 };
 
 export const isProd = config.env === 'production';

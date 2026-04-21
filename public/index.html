@@ -30,7 +30,7 @@
 
   <script type="module">
     import { initTheme, setTheme } from '/js/theme.js';
-    import { apiJson, tryRestoreSession } from '/js/api.js';
+    import { apiJson, hasToken } from '/js/api.js';
     import { setText, setAttr, $, $$, clear } from '/js/lib/escape.js';
 
     initTheme();
@@ -38,8 +38,7 @@
       btn.addEventListener('click', () => setTheme(btn.dataset.themeAction));
     }
 
-    const logged = await tryRestoreSession();
-    if (logged) {
+    if (hasToken()) {
       const link = $('#authLink');
       link.href = '/me.html';
       setText(link, 'Моя визитка');

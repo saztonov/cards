@@ -1,4 +1,4 @@
-import { verifyAccess } from '../util/tokens.js';
+import { verifyToken } from '../util/tokens.js';
 
 export function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
@@ -7,7 +7,7 @@ export function requireAuth(req, res, next) {
     return res.status(401).json({ error: 'unauthorized' });
   }
   try {
-    const payload = verifyAccess(token);
+    const payload = verifyToken(token);
     req.user = { id: payload.sub, slug: payload.slug };
     next();
   } catch {

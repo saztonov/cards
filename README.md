@@ -1,8 +1,8 @@
 # cards.fvds.ru — сайт электронных визиток
 
-Сайт визиток для коллег ГК «СУ-10». Каждый коллега заводит личный аккаунт, подтверждает email и заполняет свою визитку — открывается по публичной ссылке `/c.html?slug=<slug>`.
+Сайт визиток для коллег ГК «СУ-10». Каждый коллега регистрируется по email+паролю и заполняет свою визитку — она открывается публично по `/c.html?slug=<slug>`.
 
-Архитектура: plain HTML/CSS/JS фронт, Node.js + Express бэк, PostgreSQL, bcrypt для паролей, HS256 JWT access + opaque refresh в `__Host-` cookie. Две темы оформления через CSS-переменные (`data-theme="modern|legacy"`), legacy — точная копия старого макета из `old/app/`.
+Архитектура: plain HTML/CSS/JS фронт, Node.js + Express бэк, Yandex Managed PostgreSQL, bcrypt для паролей, stateless HS256 JWT (7 дней) в localStorage. Две темы оформления через CSS-переменные (`data-theme="modern|legacy"`); legacy — точная копия старого макета из `old/app/`.
 
 ## Структура
 
@@ -12,68 +12,66 @@ cards/
 ├── public/             # статика (HTML/CSS/JS) — её отдаёт nginx
 │   ├── css/
 │   │   ├── themes/
-│   │   │   ├── modern.css     # современные токены
-│   │   │   └── legacy.css     # точная копия старого визуала
+│   │   │   ├── modern.css
+│   │   │   └── legacy.css
 │   │   ├── reset.css
-│   │   └── app.css            # все компоненты через var(--*)
+│   │   └── app.css
 │   ├── js/
-│   │   ├── api.js             # fetch-обёртка с auto-refresh
-│   │   ├── auth.js (в api.js) # access в памяти вкладки
-│   │   ├── theme.js           # переключение темы
-│   │   └── lib/escape.js      # textContent helpers
-│   ├── index.html             # список визиток
-│   ├── login.html / register.html / password-forgot.html / reset.html
-│   ├── me.html                # редактор своей визитки
-│   └── c.html                 # публичная карточка (?slug=...)
+│   │   ├── api.js              # fetch + Bearer из localStorage
+│   │   ├── theme.js
+│   │   └── lib/escape.js       # textContent helpers (анти-XSS)
+│   ├── index.html              # список визиток
+│   ├── login.html
+│   ├── register.html
+│   ├── me.html                 # редактор своей визитки
+│   └── c.html                  # публичная карточка (?slug=...)
 ├── server/             # Node.js API
 │   ├── src/
-│   │   ├── routes/     # auth, me, cards
+│   │   ├── routes/     # auth (register/login), me, cards
 │   │   ├── middleware/ # auth, rate-limit, security-headers
-│   │   ├── util/       # tokens, slugify, hashing
-│   │   ├── config.js   # загрузка env
-│   │   ├── db.js       # pg pool
-│   │   ├── mail.js     # nodemailer
-│   │   └── index.js    # express app
+│   │   ├── util/tokens.js
+│   │   ├── config.js
+│   │   ├── db.js
+│   │   └── index.js
 │   ├── scripts/migrate.js
+│   ├── yandex-root.crt         # CA Yandex Cloud (публичный, в git)
+│   ├── .env.example
 │   └── package.json
 ├── sql/migrations/001_init.sql
-└── README.md (этот файл)
+└── README.md
 ```
 
-## Локальная разработка (Windows)
+## Локальная разработка
 
 ### 1. Подготовка
 
 ```powershell
-# В корне проекта скопировать конфиги
 Copy-Item server\.env.example server\.env
 Copy-Item public\config.example.js public\config.js
 
-# Сгенерировать секрет JWT (любые 32+ байт base64)
+# Сгенерировать JWT_SECRET (32+ байт base64) и вставить в server/.env
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-# Вставить результат в server/.env как JWT_SECRET=...
 ```
 
 ### 2. Yandex Managed PostgreSQL
 
-Одна БД на всё — `cards`. Отличаются только строки подключения: локально и прод используют один и тот же кластер через SSL. Все настройки (хост, пользователь, пароль, имя БД) — в `server/.env`.
+Одна БД `cards` на всё. Dev и prod используют один и тот же кластер через SSL. Все настройки подключения — в `server/.env`.
 
 Подготовка в Yandex Cloud console (одноразово):
 
-1. Создать кластер Managed PostgreSQL 16 (2 vCPU / 4 GB RAM для старта), регион `ru-central1`.
-2. Создать БД `cards` и пользователя `cards_user` с правами на неё.
-3. В security group кластера добавить IP локальной машины и IP VPS (`185.200.179.0`).
+1. Кластер Managed PostgreSQL 16 (2 vCPU / 4 GB RAM), регион `ru-central1`.
+2. БД `cards`, пользователь `cards_user` с правами на неё.
+3. В настройках БД включить **расширения** `pgcrypto` и `citext` (консоль → БД → Изменить → Расширения). Yandex MDB не даёт их создавать через SQL обычному пользователю — только через UI/API кластера.
+4. В security group добавить IP локальной машины и IP VPS (`185.200.179.0`).
 
-CA-сертификат Яндекса уже лежит в `server/yandex-root.crt` (скачан из `https://storage.yandexcloud.net/cloud-certs/CA.pem`). Публичный, в git безопасно.
-
-В `server/.env` прописать (хост — FQDN из консоли Yandex Cloud):
+CA-сертификат уже лежит в `server/yandex-root.crt` (публичный). В `server/.env`:
 
 ```
 DATABASE_URL=postgresql://cards_user:<password>@rc1a-XXXXXX.mdb.yandexcloud.net:6432/cards?sslmode=verify-full
 DB_CA_PATH=./yandex-root.crt
 ```
 
-Порт `6432` = pg_bouncer (рекомендуется), `5432` — прямое подключение к мастеру.
+Порт `6432` = pg_bouncer (рекомендуется), `5432` = прямое подключение.
 
 ### 3. Установка и миграции
 
@@ -85,43 +83,28 @@ npm run migrate
 
 ### 4. Запуск
 
-Два терминала:
-
 ```powershell
 # Терминал 1: API на http://localhost:3005
-cd server
-npm run dev
+cd server; npm run dev
 ```
-
 ```powershell
 # Терминал 2: статика на http://localhost:8000
-cd public
-python -m http.server 8000
+cd public; python -m http.server 8000
 ```
 
 Открыть `http://localhost:8000/`.
 
 ### 5. Проверка
 
-1. `/register.html` → ввести email и пароль (минимум 6 символов). Письмо увидишь в консоли API (SMTP не настроен в dev).
-2. Перейти по verify-ссылке из лога → редирект на `/login.html?verified=1`.
-3. Войти → попадёшь на `/me.html` → заполнить поля + аватар → «Сохранить».
-4. Открыть `/c.html?slug=<slug>` — публичная визитка. `/` — список всех.
-5. Проверка тем: `?theme=legacy`, `?theme=modern`, или переключатель в футере.
-
-## Yandex Cloud подготовка (перед деплоем на VPS)
-
-1. **Managed PostgreSQL** — кластер уже создан (см. раздел «Локальная разработка» выше). IP VPS уже в security group.
-2. **Lockbox** — создать 3 секрета:
-   - `cards/jwt-hs256` — случайные 32+ байт base64 (ключ: `secret`)
-   - `cards/db-password` — пароль пользователя БД (ключ: `password`)
-   - `cards/smtp-password` — пароль SMTP (ключ: `password`)
-3. **Сервисный аккаунт** с ролью `lockbox.payloadViewer`. Создать авторизованный ключ и положить на VPS в `/home/bcard/.yc-key.json` (chmod 600, owner bcard). Это даст `yc` CLI чтение секретов без ввода пароля.
-4. **SMTP** — Yandex Postbox или любой другой (Mailgun/SendGrid). Настроить SPF/DKIM для `cards.fvds.ru`.
+1. `/register.html` → email + пароль (минимум 6 символов) → сразу попадаешь на `/me.html` (токен выдан auto-login).
+2. Заполнить поля, загрузить аватар → «Сохранить».
+3. `/` — список всех визиток с заполненным ФИО. `/c.html?slug=<slug>` — публичная карточка.
+4. Темы: `?theme=legacy`, `?theme=modern`, либо переключатель в футере `/me`.
+5. Logout: кнопка «Выйти» на `/me.html` → очищает `localStorage.cards.token` → редирект на `/`.
 
 ## Деплой на VPS
 
-На VPS (mosgate, под root):
+На VPS (`mosgate`, под root):
 
 ```bash
 # Остановить старый макет
@@ -129,48 +112,72 @@ sudo -iu bcard pm2 stop bcard-app
 sudo -iu bcard pm2 delete bcard-app
 sudo -iu bcard pm2 save
 
-# Установить код
+# Развернуть код
 sudo -iu bcard bash -c "cd ~ && git clone <repo-url> cards"
 sudo -iu bcard bash -c "cd ~/cards/server && npm ci --omit=dev"
 
-# Создать и заполнить ~/cards/server/.env (секреты из Lockbox через yc lockbox payload get ...)
+# Создать /home/bcard/cards/server/.env (скопировать .env.example и заполнить).
+# APP_URL=https://cards.fvds.ru, NODE_ENV=production, CORS_ORIGIN оставить пустым (same-origin).
 
-# Миграции
+# Миграции и запуск
 sudo -iu bcard bash -c "cd ~/cards/server && npm run migrate"
-
-# Запуск
 sudo -iu bcard bash -c "cd ~/cards/server && pm2 start src/index.js --name cards-api && pm2 save"
 
-# Линковать статику (nginx ожидает её в /home/bcard/public)
+# Статика и каталог загрузок
 sudo -iu bcard bash -c "ln -sfn ~/cards/public ~/public"
 sudo -iu bcard mkdir -p ~/uploads
 ```
 
-Обновить `/etc/nginx/sites-enabled/bcard` согласно разделу «Шаг 7» из плана (`C:\Users\Usr\.claude\plans\transient-bubbling-crown.md`).
+Обновить `/etc/nginx/sites-enabled/bcard` — конфиг в плане (`C:\Users\Usr\.claude\plans\transient-bubbling-crown.md`, Шаг 7).
 
-Получить сертификат: `certbot --nginx -d cards.fvds.ru`.
+Сертификат: `certbot --nginx -d cards.fvds.ru`.
 
-Проверить: `nginx -t && systemctl reload nginx`.
+Применить: `nginx -t && systemctl reload nginx`.
 
-## Переключение темы централизованно
+## Администрирование
 
-Дефолтная тема для всех новых посетителей задаётся через env-переменную сервера (но влияет она только на HTML-атрибут `<html data-default-theme="...">`, который сервер сейчас не инжектит — в MVP это пока статично в HTML). Для глобального отката на легаси:
+### Сброс пароля коллеге вручную
 
-1. Отредактировать HTML-страницы в `public/` (заменить `data-default-theme="modern"` на `"legacy"`).
-2. Либо в будущем — дать серверу рендерить стартовый HTML с `data-default-theme` из env.
+В `psql` (расширение `pgcrypto` уже установлено миграцией):
 
-Индивидуальный выбор пользователя всегда имеет приоритет (сохраняется в `localStorage.cards.theme`).
+```sql
+update users
+   set password_hash = crypt('временный_пароль', gen_salt('bf', 12)),
+       updated_at = now()
+ where email = 'имя.коллеги@su10.ru';
+```
+
+Сообщить коллеге временный пароль, попросить сменить на своём профиле (пока эндпоинта смены пароля в UI нет — добавим при необходимости).
+
+### Ротация JWT_SECRET
+
+Поменять `JWT_SECRET` в `server/.env` → `pm2 restart cards-api`. Все выданные токены станут невалидны, коллеги перелогинятся. Используется при подозрении на компрометацию.
+
+### Удаление аккаунта
+
+```sql
+delete from users where email = '<email>';
+```
+Аватар остаётся в `/home/bcard/uploads/` — при необходимости `rm /home/bcard/uploads/<user_id>.webp`.
+
+## Переключение темы по умолчанию
+
+Индивидуальный выбор в `localStorage.cards.theme` имеет приоритет. Для глобального переключения дефолта — в HTML-страницах поменять `data-default-theme="modern"` на `"legacy"`. Можно позже сделать инжект из `DEFAULT_THEME` через Node-рендеринг, но в MVP задано статически.
 
 ## Безопасность
 
-- Пароли: bcrypt cost=12, минимум 6 символов. Это сознательный MVP-выбор. При утечке БД 6-символьные пароли вскрываются за часы — **ни в коем случае не допускать утечки дампов БД**.
-- Rate-limit: 5 неудач / 15 мин / IP + 10 неудач / час / email.
-- Refresh-токены: opaque 256 бит, ротируются, reuse = revoke всей сессии.
-- Access-токены: HS256, 15 мин, только в памяти вкладки.
-- Нет innerHTML с пользовательскими данными — только textContent.
+- **Пароли:** bcrypt cost=12, минимум 6 символов. Осознанный MVP-выбор (см. memory `feedback_auth_choice.md`). Короткие пароли критичны к утечке дампа БД — ограничить доступ к backup.
+- **Rate-limit:** 5 неудач / 15 мин / IP + 10 / час / email (in-memory).
+- **JWT:** HS256, 7 дней, в `localStorage`. Logout = клиент удаляет. Серверного revoke нет — при компрометации ротируем `JWT_SECRET`.
+- **Нет email-верификации** — защита от спам-регистраций только rate-limit и ручной очисткой `users`.
+- **Нет innerHTML** с пользовательскими данными — только textContent.
+
+## Что НЕ включено в MVP
+
+Email-верификация, «забыли пароль» через email, серверные сессии с revoke, 2FA/TOTP, OAuth, CAPTCHA, Redis, метрики, S3-storage. Добавим по мере реальной необходимости.
 
 ## Как расширять
 
-- **Новые поля профиля** — добавить в `sql/migrations/` новый файл `002_*.sql` и в `server/src/routes/me.js` (`PROFILE_FIELDS`).
-- **2FA / OAuth** — отдельный pass после запуска MVP.
-- **Новая тема** — добавить файл в `public/css/themes/`, добавить в `public/js/theme.js` в `THEMES` и линки во всех HTML.
+- **Новое поле профиля** → миграция `sql/migrations/002_*.sql` + добавить поле в `PROFILE_FIELDS` в [server/src/routes/me.js](server/src/routes/me.js) и в форму [public/me.html](public/me.html).
+- **Новая тема** → файл в [public/css/themes/](public/css/themes/), добавить ключ в `THEMES` в [public/js/theme.js](public/js/theme.js), `<link>` во всех HTML.
+- **Endpoint смены пароля** → `PUT /api/v1/me/password { current, new }` в [server/src/routes/me.js](server/src/routes/me.js) + UI-форма.

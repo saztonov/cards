@@ -6,10 +6,10 @@ const router = Router();
 // GET /api/v1/cards
 router.get('/', async (_req, res) => {
   const { rows } = await query(
-    `select u.slug, p.full_name, p.position, p.avatar_path
-       from users u join profiles p on p.user_id = u.id
-      where u.email_verified_at is not null and coalesce(p.full_name, '') <> ''
-      order by p.full_name`
+    `select slug, full_name, position, avatar_path
+       from users
+      where coalesce(full_name, '') <> ''
+      order by full_name`
   );
   res.json(rows);
 });
@@ -17,9 +17,8 @@ router.get('/', async (_req, res) => {
 // GET /api/v1/cards/:slug
 router.get('/:slug', async (req, res) => {
   const { rows } = await query(
-    `select u.slug, p.full_name, p.position, p.phone, p.telegram, p.about, p.avatar_path, p.social, u.email
-       from users u join profiles p on p.user_id = u.id
-      where u.slug = $1 and u.email_verified_at is not null`,
+    `select slug, full_name, position, phone, telegram, about, avatar_path, social, email
+       from users where slug = $1`,
     [req.params.slug]
   );
   if (!rows.length) return res.status(404).json({ error: 'not_found' });

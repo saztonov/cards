@@ -14,7 +14,6 @@
   <main class="page" style="justify-content:center;">
     <form id="form" class="card card--narrow body--lg stack">
       <h1 class="header__title" style="color:var(--c-text);">Регистрация</h1>
-      <p class="muted">После регистрации придёт письмо со ссылкой для подтверждения email.</p>
 
       <div>
         <label class="label" for="email">Email</label>
@@ -25,7 +24,6 @@
         <input id="password" class="field" type="password" required minlength="6" autocomplete="new-password">
       </div>
 
-      <p id="done" class="muted" hidden>Письмо отправлено. Проверьте почту.</p>
       <p id="error" class="muted" hidden style="color:#c0392b;"></p>
 
       <button type="submit" class="btn btn--primary btn--block">Создать аккаунт</button>
@@ -38,25 +36,33 @@
 
   <script type="module">
     import { initTheme } from '/js/theme.js';
-    import { apiJson } from '/js/api.js';
+    import { apiJson, setToken, hasToken } from '/js/api.js';
     import { setText, $ } from '/js/lib/escape.js';
 
     initTheme();
+
+    if (hasToken()) { location.replace('/me.html'); }
 
     $('#form').addEventListener('submit', async (e) => {
       e.preventDefault();
       $('#error').hidden = true;
       try {
-        await apiJson('/api/v1/auth/register', {
+        const data = await apiJson('/api/v1/auth/register', {
           method: 'POST',
           body: { email: $('#email').value, password: $('#password').value },
         });
-        $('#done').hidden = false;
-        $('#form').querySelector('button').disabled = true;
+        setToken(data.token);
+        location.replace('/me.html');
       } catch (ex) {
         const err = $('#error');
         err.hidden = false;
-        setText(err, ex.message === 'password_too_short' ? 'Пароль должен быть минимум 6 символов.' : 'Не удалось зарегистрироваться.');
+        const msg = {
+          password_too_short: 'Пароль должен быть минимум 6 символов.',
+          email_taken: 'Этот email уже зарегистрирован.',
+          invalid_email: 'Некорректный email.',
+          rate_limited: 'Слишком много запросов, попробуйте позже.',
+        }[ex.message] || 'Не удалось зарегистрироваться.';
+        setText(err, msg);
       }
     });
   </script>

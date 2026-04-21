@@ -1,5 +1,4 @@
 import express from 'express';
-import cookieParser from 'cookie-parser';
 import path from 'node:path';
 import { config, isProd } from './config.js';
 import { securityHeaders } from './middleware/security-headers.js';
@@ -13,13 +12,11 @@ app.set('trust proxy', 1);
 
 app.use(securityHeaders);
 app.use(express.json({ limit: '64kb' }));
-app.use(cookieParser());
 
 // В dev фронт на отдельном порту → разрешаем CORS на указанный origin.
 if (!isProd && config.corsOrigin) {
   app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', config.corsOrigin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Vary', 'Origin');
     if (req.method === 'OPTIONS') {
       res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
@@ -36,7 +33,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/me', meRoutes);
 app.use('/api/v1/cards', cardsRoutes);
 
-// Раздача загруженных файлов — в продe эту задачу берёт nginx (location /uploads/).
+// Раздача загруженных файлов — в проде эту задачу берёт nginx (location /uploads/).
 app.use('/uploads', express.static(path.resolve(config.uploads.dir)));
 
 app.use((err, _req, res, _next) => {

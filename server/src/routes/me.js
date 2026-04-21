@@ -37,9 +37,8 @@ function sanitize(input) {
 // GET /api/v1/me
 router.get('/', async (req, res) => {
   const { rows } = await query(
-    `select u.id, u.email, u.slug, p.full_name, p.position, p.phone, p.telegram, p.about, p.avatar_path, p.social
-       from users u join profiles p on p.user_id = u.id
-      where u.id = $1`,
+    `select id, email, slug, full_name, position, phone, telegram, about, avatar_path, social
+       from users where id = $1`,
     [req.user.id]
   );
   if (!rows.length) return res.status(404).json({ error: 'not_found' });
@@ -54,7 +53,7 @@ router.put('/', async (req, res) => {
   const sets = keys.map((k, i) => `${k} = $${i + 2}`).join(', ');
   const vals = keys.map((k) => data[k]);
   await query(
-    `update profiles set ${sets}, updated_at = now() where user_id = $1`,
+    `update users set ${sets}, updated_at = now() where id = $1`,
     [req.user.id, ...vals]
   );
   res.status(204).end();
@@ -68,29 +67,8 @@ router.post('/avatar', upload.single('avatar'), async (req, res) => {
   const filepath = path.join(config.uploads.dir, filename);
   await sharp(req.file.buffer).rotate().resize(512, 512, { fit: 'cover' }).webp({ quality: 85 }).toFile(filepath);
   const publicPath = `/uploads/${filename}`;
-  await query('update profiles set avatar_path = $1, updated_at = now() where user_id = $2', [publicPath, req.user.id]);
+  await query('update users set avatar_path = $1, updated_at = now() where id = $2', [publicPath, req.user.id]);
   res.json({ avatar_path: publicPath });
-});
-
-// GET /api/v1/me/sessions
-router.get('/sessions', async (req, res) => {
-  const { rows } = await query(
-    `select id, user_agent, ip::text as ip, created_at, rotated_at
-       from sessions where user_id = $1 and revoked_at is null
-       order by created_at desc`,
-    [req.user.id]
-  );
-  res.json(rows);
-});
-
-// DELETE /api/v1/me/sessions/:id
-router.delete('/sessions/:id', async (req, res) => {
-  const { rowCount } = await query(
-    'update sessions set revoked_at = now() where id = $1 and user_id = $2 and revoked_at is null',
-    [req.params.id, req.user.id]
-  );
-  if (!rowCount) return res.status(404).json({ error: 'not_found' });
-  res.status(204).end();
 });
 
 export default router;

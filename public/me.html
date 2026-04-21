@@ -58,13 +58,6 @@
       </div>
     </section>
 
-    <section class="card card--wide" style="margin-top:1rem;">
-      <div class="header"><div class="header__title">Активные устройства</div></div>
-      <div class="body">
-        <div id="sessions" class="stack"></div>
-      </div>
-    </section>
-
     <div class="theme-switch">
       Тема: <button type="button" data-theme-action="modern">современная</button>
       · <button type="button" data-theme-action="legacy">классическая</button>
@@ -73,17 +66,23 @@
 
   <script type="module">
     import { initTheme, setTheme } from '/js/theme.js';
-    import { apiJson, api, tryRestoreSession, clearAccess } from '/js/api.js';
-    import { setText, setAttr, $, $$, clear } from '/js/lib/escape.js';
+    import { apiJson, hasToken, clearToken } from '/js/api.js';
+    import { setText, setAttr, $, $$ } from '/js/lib/escape.js';
 
     initTheme();
     for (const btn of $$('[data-theme-action]')) {
       btn.addEventListener('click', () => setTheme(btn.dataset.themeAction));
     }
 
-    if (!(await tryRestoreSession())) { location.replace('/login.html'); throw new Error('unauth'); }
+    if (!hasToken()) { location.replace('/login.html'); throw new Error('unauth'); }
 
-    const me = await apiJson('/api/v1/me');
+    let me;
+    try {
+      me = await apiJson('/api/v1/me');
+    } catch (ex) {
+      if (ex.status === 401) { clearToken(); location.replace('/login.html'); }
+      throw ex;
+    }
     setAttr($('#publicLink'), 'href', `/c.html?slug=${encodeURIComponent(me.slug)}`);
     for (const f of ['full_name', 'position', 'phone', 'telegram', 'about']) {
       $(`#${f}`).value = me[f] || '';
@@ -111,39 +110,10 @@
       }
     });
 
-    $('#logout').addEventListener('click', async () => {
-      await api('/api/v1/auth/logout', { method: 'POST' });
-      clearAccess();
+    $('#logout').addEventListener('click', () => {
+      clearToken();
       location.replace('/');
     });
-
-    // Активные устройства
-    const box = $('#sessions');
-    const sessions = await apiJson('/api/v1/me/sessions');
-    clear(box);
-    if (!sessions.length) { const p = document.createElement('p'); p.className = 'muted'; setText(p, 'Нет активных сессий.'); box.appendChild(p); }
-    for (const s of sessions) {
-      const row = document.createElement('div');
-      row.className = 'row';
-      const info = document.createElement('div');
-      info.style.flex = '1';
-      const top = document.createElement('div');
-      setText(top, `${s.ip || '—'} · ${new Date(s.created_at).toLocaleString('ru-RU')}`);
-      const ua = document.createElement('div');
-      ua.className = 'row__role';
-      setText(ua, s.user_agent || '');
-      info.append(top, ua);
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'btn btn--ghost';
-      setText(btn, 'Отозвать');
-      btn.addEventListener('click', async () => {
-        await api(`/api/v1/me/sessions/${s.id}`, { method: 'DELETE' });
-        row.remove();
-      });
-      row.append(info, btn);
-      box.appendChild(row);
-    }
   </script>
 </body>
 </html>
