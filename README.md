@@ -54,13 +54,26 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 # Вставить результат в server/.env как JWT_SECRET=...
 ```
 
-### 2. PostgreSQL через Docker
+### 2. Yandex Managed PostgreSQL
 
-```powershell
-docker run -d --name cards-pg -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=cards -p 5432:5432 postgres:16
+Одна БД на всё — `cards`. Отличаются только строки подключения: локально и прод используют один и тот же кластер через SSL. Все настройки (хост, пользователь, пароль, имя БД) — в `server/.env`.
+
+Подготовка в Yandex Cloud console (одноразово):
+
+1. Создать кластер Managed PostgreSQL 16 (2 vCPU / 4 GB RAM для старта), регион `ru-central1`.
+2. Создать БД `cards` и пользователя `cards_user` с правами на неё.
+3. В security group кластера добавить IP локальной машины и IP VPS (`185.200.179.0`).
+
+CA-сертификат Яндекса уже лежит в `server/yandex-root.crt` (скачан из `https://storage.yandexcloud.net/cloud-certs/CA.pem`). Публичный, в git безопасно.
+
+В `server/.env` прописать (хост — FQDN из консоли Yandex Cloud):
+
+```
+DATABASE_URL=postgresql://cards_user:<password>@rc1a-XXXXXX.mdb.yandexcloud.net:6432/cards?sslmode=verify-full
+DB_CA_PATH=./yandex-root.crt
 ```
 
-`DATABASE_URL=postgres://postgres:dev@localhost:5432/cards` уже прописан в `.env.example`.
+Порт `6432` = pg_bouncer (рекомендуется), `5432` — прямое подключение к мастеру.
 
 ### 3. Установка и миграции
 
@@ -98,7 +111,7 @@ python -m http.server 8000
 
 ## Yandex Cloud подготовка (перед деплоем на VPS)
 
-1. **Managed PostgreSQL** — создать кластер (1 vCPU, 2 GB RAM для старта). Создать БД `cards` и пользователя приложения. Добавить IP VPS в список разрешённых.
+1. **Managed PostgreSQL** — кластер уже создан (см. раздел «Локальная разработка» выше). IP VPS уже в security group.
 2. **Lockbox** — создать 3 секрета:
    - `cards/jwt-hs256` — случайные 32+ байт base64 (ключ: `secret`)
    - `cards/db-password` — пароль пользователя БД (ключ: `password`)

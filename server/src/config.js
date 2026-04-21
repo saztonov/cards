@@ -12,7 +12,10 @@ export const config = {
   appUrl: required('APP_URL'),
   defaultTheme: process.env.DEFAULT_THEME || 'modern',
 
-  db: { connectionString: required('DATABASE_URL') },
+  db: {
+    connectionString: required('DATABASE_URL'),
+    caPath: process.env.DB_CA_PATH || '',
+  },
 
   jwt: {
     secret: required('JWT_SECRET'),
