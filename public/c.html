@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ru" data-default-theme="modern">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Визитка · СУ-10</title>
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/themes/modern.css">
+  <link rel="stylesheet" href="/css/themes/legacy.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/config.js" onerror="this.remove()"></script>
+</head>
+<body>
+  <main class="page" style="justify-content: center;">
+    <article class="pcard" id="pcard" hidden>
+      <div class="pcard__banner"></div>
+      <div class="pcard__body">
+        <img class="pcard__avatar" id="pAvatar" alt="">
+        <h1 class="pcard__name" id="pName"></h1>
+        <p class="pcard__role" id="pRole"></p>
+
+        <div class="stack" style="text-align:left;">
+          <div class="pcard__field" id="fPhone"  hidden><span class="muted">📞</span><span></span></div>
+          <div class="pcard__field" id="fEmail"  hidden><span class="muted">✉️</span><span></span></div>
+          <div class="pcard__field" id="fTg"     hidden><span class="muted">✈️</span><span></span></div>
+          <div class="pcard__field" id="fAbout"  hidden><span class="muted">ℹ️</span><span></span></div>
+        </div>
+
+        <div style="height: 1rem;"></div>
+        <a id="vcardLink" class="btn btn--primary btn--block" download="contact.vcf">Сохранить контакт</a>
+        <img id="qr" class="pcard__qr" alt="QR-ссылка на визитку" style="margin-top:1rem;">
+      </div>
+    </article>
+
+    <p id="notFound" class="muted" hidden>Визитка не найдена.</p>
+  </main>
+
+  <script type="module">
+    import { initTheme } from '/js/theme.js';
+    import { apiJson } from '/js/api.js';
+    import { setText, setAttr, $ } from '/js/lib/escape.js';
+
+    initTheme();
+
+    const slug = new URLSearchParams(location.search).get('slug');
+    if (!slug) { $('#notFound').hidden = false; throw new Error('no_slug'); }
+
+    try {
+      const c = await apiJson(`/api/v1/cards/${encodeURIComponent(slug)}`);
+      const card = $('#pcard');
+      card.hidden = false;
+      setAttr($('#pAvatar'), 'src', c.avatar_path || '');
+      setText($('#pName'), c.full_name);
+      setText($('#pRole'), c.position || '');
+
+      const show = (id, value) => {
+        if (!value) return;
+        const el = $(id);
+        el.hidden = false;
+        el.querySelector('span:last-child').textContent = value;
+      };
+      show('#fPhone', c.phone);
+      show('#fEmail', c.email);
+      show('#fTg', c.telegram ? `@${c.telegram.replace(/^@/, '')}` : '');
+      show('#fAbout', c.about);
+
+      const lines = [
+        'BEGIN:VCARD', 'VERSION:3.0',
+        `FN:${c.full_name || ''}`,
+        `ORG:Группа компаний СУ-10`,
+        c.position ? `TITLE:${c.position}` : '',
+        c.phone ? `TEL;TYPE=WORK,VOICE:${c.phone}` : '',
+        c.email ? `EMAIL;TYPE=PREF,INTERNET:${c.email}` : '',
+        'END:VCARD',
+      ].filter(Boolean).join('\n');
+      setAttr($('#vcardLink'), 'href', `data:text/vcard;charset=utf-8,${encodeURIComponent(lines)}`);
+
+      const url = `${location.origin}/c.html?slug=${encodeURIComponent(slug)}`;
+      setAttr($('#qr'), 'src', `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`);
+    } catch (err) {
+      if (err.status === 404) $('#notFound').hidden = false;
+      else console.error(err);
+    }
+  </script>
+</body>
+</html>

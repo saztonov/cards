@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru" data-default-theme="modern">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Регистрация · СУ-10 Визитки</title>
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/themes/modern.css">
+  <link rel="stylesheet" href="/css/themes/legacy.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/config.js" onerror="this.remove()"></script>
+</head>
+<body>
+  <main class="page" style="justify-content:center;">
+    <form id="form" class="card card--narrow body--lg stack">
+      <h1 class="header__title" style="color:var(--c-text);">Регистрация</h1>
+      <p class="muted">После регистрации придёт письмо со ссылкой для подтверждения email.</p>
+
+      <div>
+        <label class="label" for="email">Email</label>
+        <input id="email" class="field" type="email" required autocomplete="email">
+      </div>
+      <div>
+        <label class="label" for="password">Пароль (минимум 6 символов)</label>
+        <input id="password" class="field" type="password" required minlength="6" autocomplete="new-password">
+      </div>
+
+      <p id="done" class="muted" hidden>Письмо отправлено. Проверьте почту.</p>
+      <p id="error" class="muted" hidden style="color:#c0392b;"></p>
+
+      <button type="submit" class="btn btn--primary btn--block">Создать аккаунт</button>
+
+      <p class="muted center" style="font-size:var(--text-sm);">
+        <a href="/login.html">Уже есть аккаунт — войти</a>
+      </p>
+    </form>
+  </main>
+
+  <script type="module">
+    import { initTheme } from '/js/theme.js';
+    import { apiJson } from '/js/api.js';
+    import { setText, $ } from '/js/lib/escape.js';
+
+    initTheme();
+
+    $('#form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      $('#error').hidden = true;
+      try {
+        await apiJson('/api/v1/auth/register', {
+          method: 'POST',
+          body: { email: $('#email').value, password: $('#password').value },
+        });
+        $('#done').hidden = false;
+        $('#form').querySelector('button').disabled = true;
+      } catch (ex) {
+        const err = $('#error');
+        err.hidden = false;
+        setText(err, ex.message === 'password_too_short' ? 'Пароль должен быть минимум 6 символов.' : 'Не удалось зарегистрироваться.');
+      }
+    });
+  </script>
+</body>
+</html>

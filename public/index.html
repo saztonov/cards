@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru" data-default-theme="modern">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>СУ-10 · Визитки коллег</title>
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/themes/modern.css">
+  <link rel="stylesheet" href="/css/themes/legacy.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/config.js" onerror="this.remove()"></script>
+</head>
+<body>
+  <main class="page">
+    <section class="card">
+      <div class="header">
+        <div class="header__title">СУ-10 · Визитки</div>
+        <a id="authLink" class="btn btn--primary" href="/login.html">Войти</a>
+      </div>
+      <div class="body">
+        <div id="list" class="stack" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <div class="theme-switch">
+      Тема: <button type="button" data-theme-action="modern">современная</button>
+      · <button type="button" data-theme-action="legacy">классическая</button>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initTheme, setTheme } from '/js/theme.js';
+    import { apiJson, tryRestoreSession } from '/js/api.js';
+    import { setText, setAttr, $, $$, clear } from '/js/lib/escape.js';
+
+    initTheme();
+    for (const btn of $$('[data-theme-action]')) {
+      btn.addEventListener('click', () => setTheme(btn.dataset.themeAction));
+    }
+
+    const logged = await tryRestoreSession();
+    if (logged) {
+      const link = $('#authLink');
+      link.href = '/me.html';
+      setText(link, 'Моя визитка');
+    }
+
+    try {
+      const cards = await apiJson('/api/v1/cards');
+      const list = $('#list');
+      clear(list);
+      if (!cards.length) {
+        const p = document.createElement('p');
+        p.className = 'muted center';
+        setText(p, 'Пока никто не заполнил визитку.');
+        list.appendChild(p);
+      }
+      for (const c of cards) {
+        const a = document.createElement('a');
+        a.className = 'row';
+        setAttr(a, 'href', `/c.html?slug=${encodeURIComponent(c.slug)}`);
+        const img = document.createElement('img');
+        img.className = 'row__avatar';
+        img.loading = 'lazy';
+        setAttr(img, 'src', c.avatar_path || '');
+        setAttr(img, 'alt', '');
+        const info = document.createElement('div');
+        info.style.flex = '1';
+        const name = document.createElement('div');
+        name.className = 'row__name';
+        setText(name, c.full_name);
+        const role = document.createElement('div');
+        role.className = 'row__role';
+        setText(role, c.position || '');
+        info.append(name, role);
+        a.append(img, info);
+        list.appendChild(a);
+      }
+    } catch (err) {
+      console.error(err);
+      setText($('#list'), 'Не удалось загрузить список.');
+    }
+  </script>
+</body>
+</html>

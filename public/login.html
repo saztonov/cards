@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru" data-default-theme="modern">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Вход · СУ-10 Визитки</title>
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/themes/modern.css">
+  <link rel="stylesheet" href="/css/themes/legacy.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/config.js" onerror="this.remove()"></script>
+</head>
+<body>
+  <main class="page" style="justify-content:center;">
+    <form id="form" class="card card--narrow body--lg stack">
+      <h1 class="header__title" style="color:var(--c-text);">Вход</h1>
+      <p id="banner" class="muted" hidden></p>
+
+      <div>
+        <label class="label" for="email">Email</label>
+        <input id="email" class="field" type="email" required autocomplete="email">
+      </div>
+      <div>
+        <label class="label" for="password">Пароль</label>
+        <input id="password" class="field" type="password" required minlength="6" autocomplete="current-password">
+      </div>
+
+      <p id="error" class="muted" hidden style="color:#c0392b;"></p>
+
+      <button type="submit" class="btn btn--primary btn--block">Войти</button>
+
+      <p class="muted center" style="font-size:var(--text-sm);">
+        <a href="/register.html">Создать аккаунт</a> · <a href="/password-forgot.html">Забыли пароль?</a>
+      </p>
+    </form>
+  </main>
+
+  <script type="module">
+    import { initTheme } from '/js/theme.js';
+    import { apiJson, setAccess, tryRestoreSession } from '/js/api.js';
+    import { setText, $ } from '/js/lib/escape.js';
+
+    initTheme();
+
+    if (new URLSearchParams(location.search).get('verified') === '1') {
+      const b = $('#banner'); b.hidden = false; setText(b, 'Email подтверждён. Войдите.');
+    }
+    if (await tryRestoreSession()) { location.replace('/me.html'); }
+
+    $('#form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = $('#error'); err.hidden = true;
+      try {
+        const data = await apiJson('/api/v1/auth/login', {
+          method: 'POST',
+          body: { email: $('#email').value, password: $('#password').value },
+        });
+        setAccess(data.access);
+        location.replace('/me.html');
+      } catch (ex) {
+        err.hidden = false;
+        const msg = {
+          invalid_credentials: 'Неверный email или пароль.',
+          email_not_verified: 'Email не подтверждён — проверьте почту.',
+          too_many_attempts: 'Слишком много попыток. Повторите позже.',
+        }[ex.message] || 'Не удалось войти.';
+        setText(err, msg);
+      }
+    });
+  </script>
+</body>
+</html>

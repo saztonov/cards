@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ru" data-default-theme="modern">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Моя визитка · СУ-10</title>
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/themes/modern.css">
+  <link rel="stylesheet" href="/css/themes/legacy.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/config.js" onerror="this.remove()"></script>
+</head>
+<body>
+  <main class="page">
+    <section class="card card--wide">
+      <div class="header">
+        <div class="header__title">Моя визитка</div>
+        <div style="display:flex; gap:.5rem;">
+          <a id="publicLink" class="btn btn--soft" target="_blank">Открыть</a>
+          <button id="logout" class="btn btn--ghost" type="button">Выйти</button>
+        </div>
+      </div>
+
+      <div class="body body--lg">
+        <form id="profileForm" class="stack">
+          <div style="display:flex; gap:1rem; align-items:center;">
+            <img id="avatarPreview" class="row__avatar" alt="" style="width:4.5rem; height:4.5rem;">
+            <div style="flex:1;">
+              <label class="label">Фото (до 5 МБ)</label>
+              <input id="avatarInput" type="file" accept="image/*">
+            </div>
+          </div>
+
+          <div>
+            <label class="label" for="full_name">ФИО</label>
+            <input id="full_name" class="field" required maxlength="120">
+          </div>
+          <div>
+            <label class="label" for="position">Должность</label>
+            <input id="position" class="field" maxlength="120">
+          </div>
+          <div>
+            <label class="label" for="phone">Телефон</label>
+            <input id="phone" class="field" maxlength="40">
+          </div>
+          <div>
+            <label class="label" for="telegram">Telegram (без @)</label>
+            <input id="telegram" class="field" maxlength="60">
+          </div>
+          <div>
+            <label class="label" for="about">О себе</label>
+            <textarea id="about" class="field" rows="3" maxlength="500"></textarea>
+          </div>
+
+          <p id="status" class="muted" hidden></p>
+          <button type="submit" class="btn btn--primary">Сохранить</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="card card--wide" style="margin-top:1rem;">
+      <div class="header"><div class="header__title">Активные устройства</div></div>
+      <div class="body">
+        <div id="sessions" class="stack"></div>
+      </div>
+    </section>
+
+    <div class="theme-switch">
+      Тема: <button type="button" data-theme-action="modern">современная</button>
+      · <button type="button" data-theme-action="legacy">классическая</button>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initTheme, setTheme } from '/js/theme.js';
+    import { apiJson, api, tryRestoreSession, clearAccess } from '/js/api.js';
+    import { setText, setAttr, $, $$, clear } from '/js/lib/escape.js';
+
+    initTheme();
+    for (const btn of $$('[data-theme-action]')) {
+      btn.addEventListener('click', () => setTheme(btn.dataset.themeAction));
+    }
+
+    if (!(await tryRestoreSession())) { location.replace('/login.html'); throw new Error('unauth'); }
+
+    const me = await apiJson('/api/v1/me');
+    setAttr($('#publicLink'), 'href', `/c.html?slug=${encodeURIComponent(me.slug)}`);
+    for (const f of ['full_name', 'position', 'phone', 'telegram', 'about']) {
+      $(`#${f}`).value = me[f] || '';
+    }
+    if (me.avatar_path) setAttr($('#avatarPreview'), 'src', me.avatar_path);
+
+    $('#profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = $('#status');
+      status.hidden = false; setText(status, 'Сохраняем…');
+      const body = {};
+      for (const f of ['full_name', 'position', 'phone', 'telegram', 'about']) body[f] = $(`#${f}`).value;
+      try {
+        await apiJson('/api/v1/me', { method: 'PUT', body });
+        const file = $('#avatarInput').files[0];
+        if (file) {
+          const fd = new FormData();
+          fd.append('avatar', file);
+          const r = await apiJson('/api/v1/me/avatar', { method: 'POST', formData: fd });
+          setAttr($('#avatarPreview'), 'src', r.avatar_path);
+        }
+        setText(status, 'Сохранено.');
+      } catch {
+        setText(status, 'Не удалось сохранить.');
+      }
+    });
+
+    $('#logout').addEventListener('click', async () => {
+      await api('/api/v1/auth/logout', { method: 'POST' });
+      clearAccess();
+      location.replace('/');
+    });
+
+    // Активные устройства
+    const box = $('#sessions');
+    const sessions = await apiJson('/api/v1/me/sessions');
+    clear(box);
+    if (!sessions.length) { const p = document.createElement('p'); p.className = 'muted'; setText(p, 'Нет активных сессий.'); box.appendChild(p); }
+    for (const s of sessions) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      const info = document.createElement('div');
+      info.style.flex = '1';
+      const top = document.createElement('div');
+      setText(top, `${s.ip || '—'} · ${new Date(s.created_at).toLocaleString('ru-RU')}`);
+      const ua = document.createElement('div');
+      ua.className = 'row__role';
+      setText(ua, s.user_agent || '');
+      info.append(top, ua);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn--ghost';
+      setText(btn, 'Отозвать');
+      btn.addEventListener('click', async () => {
+        await api(`/api/v1/me/sessions/${s.id}`, { method: 'DELETE' });
+        row.remove();
+      });
+      row.append(info, btn);
+      box.appendChild(row);
+    }
+  </script>
+</body>
+</html>

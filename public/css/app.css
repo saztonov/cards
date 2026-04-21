@@ -1,0 +1,195 @@
+html, body {
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+}
+
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Layout */
+.page {
+  min-height: 100vh;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card {
+  width: 100%;
+  max-width: var(--container-xl);
+  background: var(--c-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.card--narrow { max-width: var(--container-md); }
+.card--wide   { max-width: var(--container-2xl); }
+
+.header {
+  padding: var(--space-6);
+  background: var(--c-header-bg);
+  color: var(--c-header-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header__title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+}
+
+.body { padding: var(--space-4); }
+.body--lg { padding: var(--space-8); }
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  text-align: center;
+  transition: background-color .15s, color .15s;
+}
+.btn--primary {
+  background: var(--c-accent);
+  color: var(--c-accent-text-on);
+}
+.btn--primary:hover { background: var(--c-accent-hover); text-decoration: none; }
+.btn--soft {
+  background: var(--c-accent-soft);
+  color: var(--c-accent-soft-text);
+}
+.btn--dark {
+  background: var(--c-header-bg);
+  color: var(--c-header-text);
+}
+.btn--ghost {
+  background: var(--c-surface-muted);
+  color: var(--c-text);
+}
+.btn--block { display: block; width: 100%; }
+
+/* Form */
+.field {
+  display: block;
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  background: var(--c-surface);
+  color: var(--c-text);
+}
+.field:focus {
+  outline: none;
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-accent) 20%, transparent);
+}
+.label {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--c-text-muted);
+  margin-bottom: var(--space-1);
+}
+.stack > * + * { margin-top: var(--space-4); }
+
+/* Directory list */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-2);
+  text-decoration: none;
+  color: inherit;
+}
+.row:hover {
+  border-color: var(--c-border-hover);
+  text-decoration: none;
+}
+.row__avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  background: var(--c-surface-muted);
+}
+.row__name { font-weight: 700; }
+.row__role { font-size: var(--text-sm); color: var(--c-text-muted); }
+
+/* Public card */
+.pcard {
+  width: 100%;
+  max-width: var(--container-sm);
+  background: var(--c-surface);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lift);
+  overflow: hidden;
+  padding-bottom: var(--space-6);
+}
+.pcard__banner {
+  height: 8rem;
+  background: var(--c-header-bg);
+}
+.pcard__body {
+  padding: 0 var(--space-6);
+  text-align: center;
+  position: relative;
+}
+.pcard__avatar {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 9999px;
+  border: 4px solid var(--c-surface);
+  background: var(--c-surface);
+  object-fit: cover;
+  margin: -3rem auto var(--space-4);
+}
+.pcard__name { font-size: var(--text-2xl); font-weight: 700; }
+.pcard__role { color: var(--c-accent); margin-bottom: var(--space-6); }
+.pcard__field {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  text-align: left;
+  padding: var(--space-2) 0;
+}
+.pcard__field svg {
+  flex-shrink: 0;
+  color: var(--c-text-muted);
+}
+.pcard__qr {
+  display: block;
+  margin: 0 auto var(--space-4);
+  width: 15.625rem;
+  height: 15.625rem;
+}
+
+/* Utility */
+.muted { color: var(--c-text-muted); }
+.center { text-align: center; }
+.hidden { display: none; }
+.back {
+  display: inline-block;
+  margin-bottom: var(--space-4);
+  color: var(--c-text-muted);
+}
+.back:hover { text-decoration: none; color: var(--c-text); }
+
+/* Theme switcher footer */
+.theme-switch {
+  margin-top: var(--space-6);
+  font-size: var(--text-sm);
+  color: var(--c-text-muted);
+}
+.theme-switch button {
+  color: var(--c-accent);
+  font: inherit;
+}
+.theme-switch button:hover { text-decoration: underline; }

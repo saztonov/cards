@@ -1,0 +1,51 @@
+:root[data-theme="legacy"] {
+  --c-bg:              #F8FAFC;
+  --c-bg-alt:          #F1F5F9;
+  --c-surface:         #FFFFFF;
+  --c-surface-muted:   #F1F5F9;
+  --c-border:          #E2E8F0;
+  --c-border-hover:    #FDBA74;
+  --c-text:            #0F172A;
+  --c-text-muted:      #64748B;
+  --c-text-inv:        #FFFFFF;
+
+  --c-header-bg:       #0F172A;
+  --c-header-text:     #FFFFFF;
+
+  --c-accent:          #F97316;
+  --c-accent-hover:    #EA580C;
+  --c-accent-soft:     #FFEDD5;
+  --c-accent-soft-text:#C2410C;
+  --c-accent-text-on:  #FFFFFF;
+
+  --radius-sm:  0.5rem;
+  --radius-md:  0.75rem;
+  --radius-lg:  1rem;
+  --radius-xl:  1.5rem;
+  --radius-2xl: 2rem;
+
+  --shadow-card:  0 20px 25px -5px rgb(0 0 0 / .1), 0 8px 10px -6px rgb(0 0 0 / .1);
+  --shadow-lift:  0 25px 50px -12px rgb(0 0 0 / .25);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+
+  --text-sm: .875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+
+  --container-sm:  24rem;
+  --container-md:  28rem;
+  --container-lg:  32rem;
+  --container-xl:  36rem;
+  --container-2xl: 42rem;
+}
