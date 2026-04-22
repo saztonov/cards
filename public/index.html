@@ -1,14 +1,12 @@
 <!doctype html>
-<html lang="ru" data-default-theme="modern">
+<html lang="ru">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>СУ-10 · Визитки коллег</title>
   <link rel="stylesheet" href="/css/reset.css">
-  <link rel="stylesheet" href="/css/themes/modern.css">
-  <link rel="stylesheet" href="/css/themes/legacy.css">
+  <link rel="stylesheet" href="/css/tokens.css">
   <link rel="stylesheet" href="/css/app.css">
-  <script src="/theme-default.js" onerror="this.remove()"></script>
 </head>
 <body>
   <main class="page">
@@ -21,22 +19,11 @@
         <div id="list" class="stack" aria-live="polite"></div>
       </div>
     </section>
-
-    <div class="theme-switch">
-      Тема: <button type="button" data-theme-action="modern">современная</button>
-      · <button type="button" data-theme-action="legacy">классическая</button>
-    </div>
   </main>
 
   <script type="module">
-    import { initTheme, setTheme } from '/js/theme.js';
     import { apiJson, hasToken } from '/js/api.js';
-    import { setText, setAttr, $, $$, clear } from '/js/lib/escape.js';
-
-    initTheme();
-    for (const btn of $$('[data-theme-action]')) {
-      btn.addEventListener('click', () => setTheme(btn.dataset.themeAction));
-    }
+    import { setText, setAttr, $, clear } from '/js/lib/escape.js';
 
     if (hasToken()) {
       const link = $('#authLink');

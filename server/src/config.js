@@ -10,7 +10,6 @@ export const config = {
   env: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT || 3005),
   appUrl: required('APP_URL'),
-  defaultTheme: process.env.DEFAULT_THEME || 'modern',
 
   db: {
     connectionString: required('DATABASE_URL'),

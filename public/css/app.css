@@ -182,14 +182,3 @@ a:hover { text-decoration: underline; }
 }
 .back:hover { text-decoration: none; color: var(--c-text); }
 
-/* Theme switcher footer */
-.theme-switch {
-  margin-top: var(--space-6);
-  font-size: var(--text-sm);
-  color: var(--c-text-muted);
-}
-.theme-switch button {
-  color: var(--c-accent);
-  font: inherit;
-}
-.theme-switch button:hover { text-decoration: underline; }

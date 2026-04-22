@@ -161,10 +161,6 @@ delete from users where email = '<email>';
 ```
 Аватар остаётся в `/home/bcard/uploads/` — при необходимости `rm /home/bcard/uploads/<user_id>.webp`.
 
-## Переключение темы по умолчанию
-
-Индивидуальный выбор в `localStorage.cards.theme` имеет приоритет. Для глобального переключения дефолта — в HTML-страницах поменять `data-default-theme="modern"` на `"legacy"`. Можно позже сделать инжект из `DEFAULT_THEME` через Node-рендеринг, но в MVP задано статически.
-
 ## Безопасность
 
 - **Пароли:** bcrypt cost=12, минимум 6 символов. Осознанный MVP-выбор (см. memory `feedback_auth_choice.md`). Короткие пароли критичны к утечке дампа БД — ограничить доступ к backup.
@@ -180,5 +176,5 @@ Email-верификация, «забыли пароль» через email, с
 ## Как расширять
 
 - **Новое поле профиля** → миграция `sql/migrations/002_*.sql` + добавить поле в `PROFILE_FIELDS` в [server/src/routes/me.js](server/src/routes/me.js) и в форму [public/me.html](public/me.html).
-- **Новая тема** → файл в [public/css/themes/](public/css/themes/), добавить ключ в `THEMES` в [public/js/theme.js](public/js/theme.js), `<link>` во всех HTML.
+- **Изменить оформление** → править токены в [public/css/tokens.css](public/css/tokens.css) (цвета, отступы, радиусы, шрифты). Компоненты в [public/css/app.css](public/css/app.css) используют только `var(--*)`, менять их обычно не нужно.
 - **Endpoint смены пароля** → `PUT /api/v1/me/password { current, new }` в [server/src/routes/me.js](server/src/routes/me.js) + UI-форма.

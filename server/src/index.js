@@ -28,7 +28,7 @@ if (!isProd && config.corsOrigin) {
   });
 }
 
-app.get('/api/v1/health', (_req, res) => res.json({ ok: true, theme: config.defaultTheme }));
+app.get('/api/v1/health', (_req, res) => res.json({ ok: true }));
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/me', meRoutes);

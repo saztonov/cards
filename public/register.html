@@ -1,14 +1,12 @@
 <!doctype html>
-<html lang="ru" data-default-theme="modern">
+<html lang="ru">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Регистрация · СУ-10 Визитки</title>
   <link rel="stylesheet" href="/css/reset.css">
-  <link rel="stylesheet" href="/css/themes/modern.css">
-  <link rel="stylesheet" href="/css/themes/legacy.css">
+  <link rel="stylesheet" href="/css/tokens.css">
   <link rel="stylesheet" href="/css/app.css">
-  <script src="/theme-default.js" onerror="this.remove()"></script>
 </head>
 <body>
   <main class="page" style="justify-content:center;">
@@ -40,11 +38,8 @@
   </main>
 
   <script type="module">
-    import { initTheme } from '/js/theme.js';
     import { apiJson, hasToken } from '/js/api.js';
     import { setText, $ } from '/js/lib/escape.js';
-
-    initTheme();
 
     if (hasToken()) { location.replace('/me.html'); }
 
