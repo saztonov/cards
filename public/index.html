@@ -25,7 +25,9 @@
     import { apiJson, hasToken } from '/js/api.js';
     import { setText, setAttr, $, clear } from '/js/lib/escape.js';
 
-    if (hasToken()) {
+    if (!hasToken()) { location.replace('/login.html'); throw new Error('unauth'); }
+
+    {
       const link = $('#authLink');
       link.href = '/me.html';
       setText(link, 'Моя визитка');
