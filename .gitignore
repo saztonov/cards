@@ -142,5 +142,6 @@ vite.config.ts.timestamp-*
 /old/app/
 /uploads/
 /public/config.js
+/public/theme-default.js
 
 /cert

@@ -9,8 +9,10 @@ function pickTheme() {
   }
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored && THEMES.has(stored)) return stored;
-  const defaultFromServer = document.documentElement.dataset.defaultTheme;
-  if (defaultFromServer && THEMES.has(defaultFromServer)) return defaultFromServer;
+  const fromServer = globalThis.__CARDS_DEFAULT_THEME__;
+  if (fromServer && THEMES.has(fromServer)) return fromServer;
+  const defaultAttr = document.documentElement.dataset.defaultTheme;
+  if (defaultAttr && THEMES.has(defaultAttr)) return defaultAttr;
   return 'modern';
 }
 
