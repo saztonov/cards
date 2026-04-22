@@ -1,4 +1,21 @@
-const BASE = (window.__CARDS_CONFIG__?.API_URL || '').replace(/\/$/, '');
+// API URL определяется автоматически:
+// - в prod (VPS) фронт и API на одном origin, nginx проксирует /api/ → BASE = ''
+// - в dev статика обычно на :8000, API на :3005 → BASE = http://<host>:3005
+// - если нужно переопределить вручную, задай window.__CARDS_CONFIG__.API_URL
+//   ДО подключения этого скрипта.
+function detectBase() {
+  const override = globalThis.__CARDS_CONFIG__?.API_URL;
+  if (typeof override === 'string') return override.replace(/\/$/, '');
+
+  const { hostname, protocol, port } = window.location;
+  const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+  const isStaticDev = isLocal && port && port !== '3005';
+  if (isStaticDev) return `${protocol}//${hostname}:3005`;
+
+  return '';
+}
+
+const BASE = detectBase();
 const TOKEN_KEY = 'cards.token';
 
 export function getToken() { return localStorage.getItem(TOKEN_KEY); }

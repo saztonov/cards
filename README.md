@@ -47,11 +47,12 @@ cards/
 
 ```powershell
 Copy-Item server\.env.example server\.env
-Copy-Item public\config.example.js public\config.js
 
 # Сгенерировать JWT_SECRET (32+ байт base64) и вставить в server/.env
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
+
+Фронт сам определит адрес API: в dev (статика на `:8000` и т.п.) обращается к `http://<host>:3005`, в проде — same-origin через nginx. Файл `public/config.js` не требуется; нужен только если хочется переопределить URL вручную (шаблон — `public/config.example.js`).
 
 ### 2. Yandex Managed PostgreSQL
 
