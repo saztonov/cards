@@ -1,7 +1,13 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import url, { pathToFileURL } from 'node:url';
+import bcrypt from 'bcrypt';
 import { pool } from '../src/db.js';
+
+// Зависимости, доступные JS-миграциям как второй аргумент up(client, deps).
+// Миграции лежат в ../../sql/migrations/ — импортировать npm-пакеты оттуда
+// нельзя (нет соседнего node_modules), поэтому инжектируем отсюда.
+const deps = { bcrypt };
 
 const here = path.dirname(url.fileURLToPath(import.meta.url));
 const migrationsDir = path.resolve(here, '../../sql/migrations');
@@ -40,9 +46,9 @@ async function main() {
       } else {
         const mod = await import(pathToFileURL(full).href);
         if (typeof mod.up !== 'function') {
-          throw new Error(`${file}: expected export "up(client)"`);
+          throw new Error(`${file}: expected export "up(client, deps)"`);
         }
-        await mod.up(client);
+        await mod.up(client, deps);
       }
       await client.query('insert into _migrations (name) values ($1)', [file]);
       await client.query('commit');
