@@ -19,7 +19,7 @@ const upload = multer({
   },
 });
 
-const PROFILE_FIELDS = ['full_name', 'position', 'phone', 'telegram', 'about', 'social'];
+const PROFILE_FIELDS = ['full_name', 'position', 'phone', 'telegram', 'about', 'social', 'show_photo'];
 
 function sanitize(input) {
   const out = {};
@@ -27,6 +27,8 @@ function sanitize(input) {
     if (!(k in input)) continue;
     if (k === 'social') {
       out[k] = input[k] && typeof input[k] === 'object' ? input[k] : {};
+    } else if (k === 'show_photo') {
+      out[k] = Boolean(input[k]);
     } else {
       out[k] = input[k] == null ? null : String(input[k]).slice(0, 500);
     }
@@ -37,7 +39,7 @@ function sanitize(input) {
 // GET /api/v1/me
 router.get('/', async (req, res) => {
   const { rows } = await query(
-    `select id, email, slug, full_name, position, phone, telegram, about, avatar_path, social, role, is_active
+    `select id, email, slug, full_name, position, phone, telegram, about, avatar_path, social, show_photo, role, is_active
        from users where id = $1`,
     [req.user.id]
   );

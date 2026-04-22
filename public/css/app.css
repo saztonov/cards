@@ -171,6 +171,23 @@ a:hover { text-decoration: underline; }
   height: 15.625rem;
 }
 
+/* Public card — no-photo variant */
+.pcard--no-photo .pcard__banner {
+  height: auto;
+  min-height: 9rem;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: var(--c-header-text);
+}
+.pcard--no-photo .pcard__avatar { display: none; }
+.pcard--no-photo .pcard__body { padding-top: var(--space-6); }
+.pcard--no-photo .pcard__name { color: var(--c-header-text); }
+.pcard--no-photo .pcard__role { color: var(--c-accent); margin-bottom: 0; }
+
 /* Utility */
 .muted { color: var(--c-text-muted); }
 .center { text-align: center; }

@@ -44,7 +44,12 @@
       const c = await apiJson(`/api/v1/cards/${encodeURIComponent(slug)}`);
       const card = $('#pcard');
       card.hidden = false;
-      setAttr($('#pAvatar'), 'src', c.avatar_path || '');
+      if (c.show_photo === false) {
+        card.classList.add('pcard--no-photo');
+        card.querySelector('.pcard__banner').append($('#pName'), $('#pRole'));
+      } else {
+        setAttr($('#pAvatar'), 'src', c.avatar_path || '');
+      }
       setText($('#pName'), c.full_name);
       setText($('#pRole'), c.position || '');
 

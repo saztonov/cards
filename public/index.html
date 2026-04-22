@@ -45,11 +45,6 @@
         const a = document.createElement('a');
         a.className = 'row';
         setAttr(a, 'href', `/c.html?slug=${encodeURIComponent(c.slug)}`);
-        const img = document.createElement('img');
-        img.className = 'row__avatar';
-        img.loading = 'lazy';
-        setAttr(img, 'src', c.avatar_path || '');
-        setAttr(img, 'alt', '');
         const info = document.createElement('div');
         info.style.flex = '1';
         const name = document.createElement('div');
@@ -59,7 +54,16 @@
         role.className = 'row__role';
         setText(role, c.position || '');
         info.append(name, role);
-        a.append(img, info);
+        if (c.show_photo !== false) {
+          const img = document.createElement('img');
+          img.className = 'row__avatar';
+          img.loading = 'lazy';
+          setAttr(img, 'src', c.avatar_path || '');
+          setAttr(img, 'alt', '');
+          a.append(img, info);
+        } else {
+          a.append(info);
+        }
         list.appendChild(a);
       }
     } catch (err) {

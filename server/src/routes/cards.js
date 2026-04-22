@@ -6,7 +6,7 @@ const router = Router();
 // GET /api/v1/cards
 router.get('/', async (_req, res) => {
   const { rows } = await query(
-    `select slug, full_name, position, avatar_path
+    `select slug, full_name, position, avatar_path, show_photo
        from users
       where coalesce(full_name, '') <> ''
       order by full_name`
@@ -17,7 +17,7 @@ router.get('/', async (_req, res) => {
 // GET /api/v1/cards/:slug
 router.get('/:slug', async (req, res) => {
   const { rows } = await query(
-    `select slug, full_name, position, phone, telegram, about, avatar_path, social, email
+    `select slug, full_name, position, phone, telegram, about, avatar_path, social, show_photo, email
        from users where slug = $1`,
     [req.params.slug]
   );

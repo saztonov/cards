@@ -51,6 +51,13 @@
             <textarea id="about" class="field" rows="3" maxlength="500"></textarea>
           </div>
 
+          <div>
+            <label class="label">
+              <input type="checkbox" id="show_photo">
+              Показывать фото на визитке
+            </label>
+          </div>
+
           <p id="status" class="muted" hidden></p>
           <button type="submit" class="btn btn--primary">Сохранить</button>
         </form>
@@ -76,6 +83,7 @@
     for (const f of ['full_name', 'position', 'phone', 'telegram', 'about']) {
       $(`#${f}`).value = me[f] || '';
     }
+    $('#show_photo').checked = me.show_photo !== false;
     if (me.avatar_path) setAttr($('#avatarPreview'), 'src', me.avatar_path);
 
     $('#profileForm').addEventListener('submit', async (e) => {
@@ -84,6 +92,7 @@
       status.hidden = false; setText(status, 'Сохраняем…');
       const body = {};
       for (const f of ['full_name', 'position', 'phone', 'telegram', 'about']) body[f] = $(`#${f}`).value;
+      body.show_photo = $('#show_photo').checked;
       try {
         await apiJson('/api/v1/me', { method: 'PUT', body });
         const file = $('#avatarInput').files[0];
