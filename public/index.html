@@ -22,10 +22,19 @@
   </main>
 
   <script type="module">
-    import { apiJson, hasToken } from '/js/api.js';
+    import { apiJson, hasToken, clearToken } from '/js/api.js';
     import { setText, setAttr, $, clear } from '/js/lib/escape.js';
 
     if (!hasToken()) { location.replace('/login.html'); throw new Error('unauth'); }
+
+    let me;
+    try {
+      me = await apiJson('/api/v1/me');
+    } catch (ex) {
+      if (ex.status === 401) { clearToken(); location.replace('/login.html'); throw ex; }
+      throw ex;
+    }
+    if (me.role !== 'admin') { location.replace('/me.html'); throw new Error('not_admin'); }
 
     {
       const link = $('#authLink');

@@ -36,7 +36,7 @@
     import { apiJson, setToken, hasToken } from '/js/api.js';
     import { setText, $ } from '/js/lib/escape.js';
 
-    if (hasToken()) { location.replace('/'); }
+    if (hasToken()) { location.replace('/me.html'); }
 
     $('#form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -47,7 +47,7 @@
           body: { email: $('#email').value, password: $('#password').value },
         });
         setToken(data.token);
-        location.replace('/');
+        location.replace('/me.html');
       } catch (ex) {
         err.hidden = false;
         const msg = {

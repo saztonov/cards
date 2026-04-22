@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { query } from '../db.js';
+import { requireAuth, requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
 
-// GET /api/v1/cards
-router.get('/', async (_req, res) => {
+// GET /api/v1/cards — список всех визиток, только для админа.
+router.get('/', requireAuth, requireAdmin, async (_req, res) => {
   const { rows } = await query(
     `select slug, full_name, position, avatar_path, show_photo
        from users
