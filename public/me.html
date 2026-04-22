@@ -14,10 +14,12 @@
       <div class="header">
         <div class="header__title">Моя визитка</div>
         <div style="display:flex; gap:.5rem;">
-          <a id="adminLink" class="btn btn--soft" href="/admin.html" hidden>Администрирование</a>
           <a id="publicLink" class="btn btn--soft" target="_blank">Открыть</a>
-          <button id="logout" class="btn btn--ghost" type="button">Выйти</button>
         </div>
+      </div>
+
+      <div class="body" style="padding-top:var(--space-4); padding-bottom:0;">
+        <a id="adminLink" class="btn btn--soft" href="/admin.html" hidden>Администрирование</a>
       </div>
 
       <div class="body body--lg">
@@ -59,7 +61,10 @@
           </div>
 
           <p id="status" class="muted" hidden></p>
-          <button type="submit" class="btn btn--primary">Сохранить</button>
+          <div style="display:flex; gap:.5rem; align-items:center;">
+            <button type="submit" class="btn btn--primary">Сохранить</button>
+            <button id="logout" class="btn btn--ghost" type="button" style="margin-left:auto;">Выйти</button>
+          </div>
         </form>
       </div>
     </section>
