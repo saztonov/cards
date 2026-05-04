@@ -86,26 +86,16 @@
       qr.make();
       setAttr($('#qr'), 'src', qr.createDataURL(8, 4));
 
-      const shareText = `${c.full_name}${c.position ? ' — ' + c.position : ''}`;
+      const shareText = `ООО "СУ-10"\n${c.full_name}${c.position ? '\n' + c.position : ''}`;
       const shareData = { title: c.full_name, text: shareText, url };
       const btn = $('#shareBtn');
       const canShare = typeof navigator.share === 'function';
-      const canCopy = !!(navigator.clipboard && navigator.clipboard.writeText);
-      if (canShare || canCopy) {
+      const isTouch = matchMedia('(pointer: coarse)').matches;
+      if (canShare && isTouch) {
         btn.hidden = false;
         btn.addEventListener('click', async () => {
-          try {
-            if (canShare) {
-              await navigator.share(shareData);
-            } else {
-              await navigator.clipboard.writeText(`${shareText}\n${url}`);
-              setText(btn, 'Скопировано ✓');
-              btn.disabled = true;
-              setTimeout(() => { setText(btn, 'Отправить контакт'); btn.disabled = false; }, 1500);
-            }
-          } catch (err) {
-            if (err.name !== 'AbortError') console.error(err);
-          }
+          try { await navigator.share(shareData); }
+          catch (err) { if (err.name !== 'AbortError') console.error(err); }
         });
       }
     } catch (err) {
