@@ -34,6 +34,7 @@
     <p id="notFound" class="muted" hidden>Визитка не найдена.</p>
   </main>
 
+  <script src="/js/vendor/qrcode.min.js"></script>
   <script type="module">
     import { apiJson } from '/js/api.js';
     import { setText, setAttr, $ } from '/js/lib/escape.js';
@@ -77,7 +78,10 @@
       setAttr($('#vcardLink'), 'href', `data:text/vcard;charset=utf-8,${encodeURIComponent(lines)}`);
 
       const url = `${location.origin}/c.html?slug=${encodeURIComponent(slug)}`;
-      setAttr($('#qr'), 'src', `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`);
+      const qr = qrcode(0, 'M');
+      qr.addData(url);
+      qr.make();
+      setAttr($('#qr'), 'src', qr.createDataURL(8, 4));
     } catch (err) {
       if (err.status === 404) $('#notFound').hidden = false;
       else console.error(err);
