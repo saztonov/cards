@@ -56,10 +56,10 @@ a:hover { text-decoration: underline; }
   transition: background-color .15s, color .15s;
 }
 .btn--primary {
-  background: var(--c-accent);
+  background: #9B5148;
   color: var(--c-accent-text-on);
 }
-.btn--primary:hover { background: var(--c-accent-hover); text-decoration: none; }
+.btn--primary:hover { background: #7E4239; text-decoration: none; }
 .btn--soft {
   background: var(--c-accent-soft);
   color: var(--c-accent-soft-text);
@@ -140,8 +140,21 @@ a:hover { text-decoration: underline; }
   overflow: hidden;
   padding-bottom: var(--space-6);
 }
+.pcard__brandbar {
+  background: #FFFFFF;
+  padding: .75rem var(--space-6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid var(--c-border);
+}
+.pcard__brandbar img {
+  height: 3.25rem;
+  width: auto;
+  display: block;
+}
 .pcard__banner {
-  height: 8rem;
+  height: 3rem;
   background: var(--c-header-bg);
 }
 .pcard__body {
@@ -158,14 +171,14 @@ a:hover { text-decoration: underline; }
   object-fit: cover;
   margin: -3rem auto var(--space-4);
 }
-.pcard__name { font-size: var(--text-2xl); font-weight: 700; }
-.pcard__role { color: var(--c-accent); margin-bottom: var(--space-6); }
+.pcard__name { font-size: 1.75rem; font-weight: 700; line-height: 1.2; }
+.pcard__role { color: var(--c-accent); font-size: 1.0625rem; margin-top: var(--space-1); margin-bottom: var(--space-6); }
 .pcard__field {
   display: flex;
   gap: var(--space-3);
   align-items: center;
   text-align: left;
-  padding: var(--space-2) 0;
+  padding: var(--space-1) 0;
 }
 .pcard__field svg {
   flex-shrink: 0;
@@ -181,8 +194,8 @@ a:hover { text-decoration: underline; }
 /* Public card — no-photo variant */
 .pcard--no-photo .pcard__banner {
   height: auto;
-  min-height: 9rem;
-  padding: var(--space-6);
+  min-height: 5rem;
+  padding: var(--space-4) var(--space-6);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -191,7 +204,7 @@ a:hover { text-decoration: underline; }
   color: var(--c-header-text);
 }
 .pcard--no-photo .pcard__avatar { display: none; }
-.pcard--no-photo .pcard__body { padding-top: var(--space-6); }
+.pcard--no-photo .pcard__body { padding-top: var(--space-4); }
 .pcard--no-photo .pcard__name { color: var(--c-header-text); }
 .pcard--no-photo .pcard__role { color: var(--c-accent); margin-bottom: 0; }
 

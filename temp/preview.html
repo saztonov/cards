@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Предпросмотр — визитка с логотипом СУ-10</title>
+  <style>
+    :root {
+      --c-bg:           #F8FAFC;
+      --c-surface:      #FFFFFF;
+      --c-border:       #E2E8F0;
+      --c-text:         #0F172A;
+      --c-text-muted:   #64748B;
+      --c-header-bg:    #0F172A;
+      --c-header-text:  #FFFFFF;
+      --c-accent:       #F97316;
+      --c-accent-hover: #EA580C;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: var(--c-bg);
+      color: var(--c-text);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 16px;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1rem;
+    }
+    h2.section {
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--c-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* === public card === */
+    .pcard {
+      width: 100%;
+      max-width: 24rem;
+      background: var(--c-surface);
+      border-radius: 2rem;
+      box-shadow: 0 25px 50px -12px rgb(0 0 0 / .25);
+      overflow: hidden;
+      padding-bottom: 1.5rem;
+    }
+
+    /* НОВОЕ: бренд-полоса */
+    .pcard__brandbar {
+      background: #FFFFFF;
+      padding: .75rem 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-bottom: 1px solid var(--c-border);
+    }
+    .pcard__brandbar img {
+      height: 3.25rem;
+      width: auto;
+      display: block;
+    }
+
+    /* шапка no-photo */
+    .pcard__banner {
+      min-height: 5rem;
+      padding: 1rem 1.5rem;
+      background: var(--c-header-bg);
+      color: var(--c-header-text);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .pcard__name {
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .pcard__role {
+      color: var(--c-accent);
+      margin-top: .375rem;
+      font-size: 1.0625rem;
+    }
+
+    /* тело */
+    .pcard__body {
+      padding: 1rem 1.5rem 0;
+      text-align: center;
+    }
+    .pcard__field {
+      display: flex;
+      gap: .75rem;
+      align-items: center;
+      text-align: left;
+      padding: .25rem 0;
+    }
+    .pcard__field .ic { color: var(--c-text-muted); width: 1.25rem; text-align: center; }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: .75rem 1.5rem;
+      border-radius: .75rem;
+      font-weight: 500;
+      background: #9B5148;
+      color: #fff;
+      text-align: center;
+      text-decoration: none;
+      margin-top: 1rem;
+      transition: background-color .15s;
+    }
+    .btn:hover { background: #7E4239; }
+
+    .qr {
+      display: block;
+      margin: 1rem auto 0;
+      width: 15.625rem;
+      height: 15.625rem;
+      background:
+        repeating-conic-gradient(#0F172A 0 25%, #fff 0 50%) 50% / 14px 14px;
+      border-radius: .25rem;
+    }
+
+    /* вариант с фото */
+    .pcard--photo .pcard__banner { min-height: auto; height: 3rem; padding: 0; }
+    .pcard--photo .pcard__body { padding-top: 0; }
+    .pcard__avatar {
+      width: 6rem;
+      height: 6rem;
+      border-radius: 9999px;
+      border: 4px solid var(--c-surface);
+      background: linear-gradient(135deg, #94a3b8, #64748b);
+      object-fit: cover;
+      margin: -3rem auto 1rem;
+      display: block;
+    }
+    .pcard--photo .pcard__name { color: var(--c-text); }
+  </style>
+</head>
+<body>
+
+  <h2 class="section">Без фото (как на скриншоте 2)</h2>
+
+  <article class="pcard">
+    <div class="pcard__brandbar">
+      <img src="logo.jpg" alt="СУ-10 — Генеральный подрядчик">
+    </div>
+    <div class="pcard__banner">
+      <h1 class="pcard__name">Постоев Евгений Владимирович</h1>
+      <p class="pcard__role">Финансовый менеджер</p>
+    </div>
+    <div class="pcard__body">
+      <div style="text-align:left">
+        <div class="pcard__field"><span class="ic">📞</span><span>+7 (915) 120-20-30</span></div>
+        <div class="pcard__field"><span class="ic">✉️</span><span>postoev.e.v@su10.ru</span></div>
+        <div class="pcard__field"><span class="ic">✈️</span><span>@Postoev_ev</span></div>
+      </div>
+      <a class="btn" href="#">Сохранить контакт</a>
+      <div class="qr" aria-label="QR placeholder"></div>
+    </div>
+  </article>
+
+  <h2 class="section">С фото (для проверки совместимости)</h2>
+
+  <article class="pcard pcard--photo">
+    <div class="pcard__brandbar">
+      <img src="logo.jpg" alt="СУ-10 — Генеральный подрядчик">
+    </div>
+    <div class="pcard__banner"></div>
+    <div class="pcard__body">
+      <div class="pcard__avatar"></div>
+      <h1 class="pcard__name">Постоев Евгений Владимирович</h1>
+      <p class="pcard__role" style="margin-bottom:1.5rem">Финансовый менеджер</p>
+      <div style="text-align:left">
+        <div class="pcard__field"><span class="ic">📞</span><span>+7 (915) 120-20-30</span></div>
+        <div class="pcard__field"><span class="ic">✉️</span><span>postoev.e.v@su10.ru</span></div>
+        <div class="pcard__field"><span class="ic">✈️</span><span>@Postoev_ev</span></div>
+      </div>
+      <a class="btn" href="#">Сохранить контакт</a>
+      <div class="qr" aria-label="QR placeholder"></div>
+    </div>
+  </article>
+
+  <p style="color:var(--c-text-muted); font-size:.875rem; max-width:24rem; text-align:center; margin-bottom:1rem;">
+    Это статичный макет. Реальный логотип берётся из <code>temp/logo.jpg</code> по относительному пути.
+  </p>
+
+</body>
+</html>
