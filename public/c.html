@@ -28,6 +28,7 @@
         <div style="height: 1rem;"></div>
         <a id="vcardLink" class="btn btn--primary btn--block" download="contact.vcf">Сохранить контакт</a>
         <img id="qr" class="pcard__qr" alt="QR-ссылка на визитку" style="margin-top:1rem;">
+        <button id="shareBtn" class="btn btn--ghost btn--block" type="button" hidden style="margin-top:1rem;">Отправить контакт</button>
       </div>
     </article>
 
@@ -84,6 +85,29 @@
       qr.addData(url);
       qr.make();
       setAttr($('#qr'), 'src', qr.createDataURL(8, 4));
+
+      const shareText = `${c.full_name}${c.position ? ' — ' + c.position : ''}`;
+      const shareData = { title: c.full_name, text: shareText, url };
+      const btn = $('#shareBtn');
+      const canShare = typeof navigator.share === 'function';
+      const canCopy = !!(navigator.clipboard && navigator.clipboard.writeText);
+      if (canShare || canCopy) {
+        btn.hidden = false;
+        btn.addEventListener('click', async () => {
+          try {
+            if (canShare) {
+              await navigator.share(shareData);
+            } else {
+              await navigator.clipboard.writeText(`${shareText}\n${url}`);
+              setText(btn, 'Скопировано ✓');
+              btn.disabled = true;
+              setTimeout(() => { setText(btn, 'Отправить контакт'); btn.disabled = false; }, 1500);
+            }
+          } catch (err) {
+            if (err.name !== 'AbortError') console.error(err);
+          }
+        });
+      }
     } catch (err) {
       if (err.status === 404) $('#notFound').hidden = false;
       else console.error(err);
