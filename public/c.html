@@ -19,10 +19,10 @@
         <p class="pcard__role" id="pRole"></p>
 
         <div class="stack" style="text-align:left;">
-          <div class="pcard__field" id="fPhone"  hidden><span class="muted">📞</span><span></span></div>
-          <div class="pcard__field" id="fEmail"  hidden><span class="muted">✉️</span><span></span></div>
-          <div class="pcard__field" id="fTg"     hidden><span class="muted">✈️</span><span></span></div>
-          <div class="pcard__field" id="fAbout"  hidden><span class="muted">ℹ️</span><span></span></div>
+          <a class="pcard__field" id="fPhone" href="#" hidden><span class="muted">📞</span><span></span></a>
+          <a class="pcard__field" id="fEmail" href="#" hidden><span class="muted">✉️</span><span></span></a>
+          <a class="pcard__field" id="fTg" href="#" target="_blank" rel="noopener" hidden><span class="muted"><svg viewBox="0 0 24 24" width="20" height="20" fill="#26A5E4" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg></span><span></span></a>
+          <div class="pcard__field" id="fAbout" hidden><span class="muted">ℹ️</span><span></span></div>
         </div>
 
         <div style="height: 1rem;"></div>
@@ -55,15 +55,17 @@
       setText($('#pName'), c.full_name);
       setText($('#pRole'), c.position || '');
 
-      const show = (id, value) => {
+      const show = (id, value, href) => {
         if (!value) return;
         const el = $(id);
         el.hidden = false;
         el.querySelector('span:last-child').textContent = value;
+        if (href) setAttr(el, 'href', href);
       };
-      show('#fPhone', c.phone);
-      show('#fEmail', c.email);
-      show('#fTg', c.telegram ? `@${c.telegram.replace(/^@/, '')}` : '');
+      show('#fPhone', c.phone, c.phone && `tel:${c.phone.replace(/[^\d+]/g, '')}`);
+      show('#fEmail', c.email, c.email && `mailto:${c.email}`);
+      const tgNick = c.telegram ? c.telegram.replace(/^@/, '') : '';
+      show('#fTg', tgNick && `@${tgNick}`, tgNick && `https://t.me/${tgNick}`);
       show('#fAbout', c.about);
 
       const lines = [

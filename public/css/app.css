@@ -179,7 +179,11 @@ a:hover { text-decoration: underline; }
   align-items: center;
   text-align: left;
   padding: var(--space-1) 0;
+  color: inherit;
+  text-decoration: none;
 }
+.pcard__field:hover { text-decoration: none; }
+.pcard__field[href]:hover span:last-child { text-decoration: underline; }
 .pcard__field svg {
   flex-shrink: 0;
   color: var(--c-text-muted);

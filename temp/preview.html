@@ -100,8 +100,12 @@
       align-items: center;
       text-align: left;
       padding: .25rem 0;
+      color: inherit;
+      text-decoration: none;
     }
-    .pcard__field .ic { color: var(--c-text-muted); width: 1.25rem; text-align: center; }
+    .pcard__field[href]:hover span:last-child { text-decoration: underline; }
+    .pcard__field .ic { color: var(--c-text-muted); width: 1.25rem; text-align: center; display: inline-flex; align-items: center; justify-content: center; }
+    .pcard__field .ic svg { display: block; }
 
     .btn {
       display: block;
@@ -158,9 +162,9 @@
     </div>
     <div class="pcard__body">
       <div style="text-align:left">
-        <div class="pcard__field"><span class="ic">📞</span><span>+7 (915) 120-20-30</span></div>
-        <div class="pcard__field"><span class="ic">✉️</span><span>postoev.e.v@su10.ru</span></div>
-        <div class="pcard__field"><span class="ic">✈️</span><span>@Postoev_ev</span></div>
+        <a class="pcard__field" href="tel:+79151202030"><span class="ic">📞</span><span>+7 (915) 120-20-30</span></a>
+        <a class="pcard__field" href="mailto:postoev.e.v@su10.ru"><span class="ic">✉️</span><span>postoev.e.v@su10.ru</span></a>
+        <a class="pcard__field" href="https://t.me/Postoev_ev" target="_blank" rel="noopener"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="#26A5E4" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg></span><span>@Postoev_ev</span></a>
       </div>
       <a class="btn" href="#">Сохранить контакт</a>
       <div class="qr" aria-label="QR placeholder"></div>
@@ -179,9 +183,9 @@
       <h1 class="pcard__name">Постоев Евгений Владимирович</h1>
       <p class="pcard__role" style="margin-bottom:1.5rem">Финансовый менеджер</p>
       <div style="text-align:left">
-        <div class="pcard__field"><span class="ic">📞</span><span>+7 (915) 120-20-30</span></div>
-        <div class="pcard__field"><span class="ic">✉️</span><span>postoev.e.v@su10.ru</span></div>
-        <div class="pcard__field"><span class="ic">✈️</span><span>@Postoev_ev</span></div>
+        <a class="pcard__field" href="tel:+79151202030"><span class="ic">📞</span><span>+7 (915) 120-20-30</span></a>
+        <a class="pcard__field" href="mailto:postoev.e.v@su10.ru"><span class="ic">✉️</span><span>postoev.e.v@su10.ru</span></a>
+        <a class="pcard__field" href="https://t.me/Postoev_ev" target="_blank" rel="noopener"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="#26A5E4" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg></span><span>@Postoev_ev</span></a>
       </div>
       <a class="btn" href="#">Сохранить контакт</a>
       <div class="qr" aria-label="QR placeholder"></div>
